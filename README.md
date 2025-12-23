@@ -1,5 +1,16 @@
 # New AOI admin management application
-
+-- login page 
+-- admin / users 
+-- data bases 
+-- Students 
+-- Edit information of students
+-- Elegent design (ig)
+-- Export all students to CSV or Excel format
+-- Import all students data and add it directly to database
+-- Edit existing students without changing form structure
+-- Form refreshes student list after operations (ig it's fast enought)
+-- phone - computer 
+ 
 
 
 ## Getting Started
