@@ -160,7 +160,7 @@ export default function AOIPortal() {
                 : "hover:bg-white/5 text-gray-400"
             }`}
           >
-            <Package size={20} /> <span className="font-bold">Logistics</span>
+            <Package size={20} /> <span className="font-bold">Technical resources</span>
           </button>
           {currentUser?.role === "admin" && (
             <button
