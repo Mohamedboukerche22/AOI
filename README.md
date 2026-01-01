@@ -58,6 +58,8 @@ graph LR
 First, run the development server:
 
 ```bash
+npm i
+#to install packages
 npm run dev
 # or
 yarn dev
