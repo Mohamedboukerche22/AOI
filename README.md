@@ -21,6 +21,7 @@
 
 - phone - computer 
 
+
 ## pictures from app
 
 
@@ -51,6 +52,7 @@ graph LR
     style Login fill:#1ff,stroke:#333,stroke-width:2px
     
 ```
+
 
 
 ## Getting Started
