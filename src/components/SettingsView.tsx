@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
 
 export default function SettingsView({
   user,
@@ -34,10 +35,10 @@ export default function SettingsView({
       localStorage.setItem("aoi_session", JSON.stringify(result.user));
       onUpdate(result.user);
 
-      alert("Settings saved successfully!");
+      toast.success("Settings saved successfully!");
       setPassword("");
     } catch (err: any) {
-      alert(err.message);
+      toast.error(err.message);
     } finally {
       setLoading(false);
     }
