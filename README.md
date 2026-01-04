@@ -21,11 +21,27 @@
 
 - phone - computer 
 
+- settings
+
+- change password 
+
+- add coaches (just thier email)
+
+- default password of coaches is `AOI`
+
 ## pictures from app
 
-
+# login page
 <img src="public/Login.png" width="300">
+
+# Dashboard 
+## old
 <img src="public/Dashboard.png" width="300">
+
+## new
+
+<img src="public/Dashboard-new.png" width="300">
+
 <img src="public/Students.png" width="300">
 <img src="public/1.png" width="300">
 <img src= "public/image.png" width="300">

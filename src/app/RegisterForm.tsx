@@ -25,7 +25,7 @@ export default function RegisterPage() {
       options: {
         data: {
           full_name: fullName,
-          role: 'pending', // or 'staff'
+          role: 'coach',
         },
       },
     });

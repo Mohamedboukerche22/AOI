@@ -1,46 +1,38 @@
 'use client';
 
-import AOILOGO from '../AOI_COLOR_NLOGO_WHITE.png';
 import { useState } from 'react';
-import { createClient } from '@supabase/supabase-js';
-import bcrypt from 'bcryptjs';
 import { useRouter } from 'next/navigation';
+import AOILOGO from '../AOI_COLOR_NLOGO_WHITE.png';
+import { toast } from 'sonner';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-);
 
 export default function LoginPage() {
   const [authEmail, setAuthEmail] = useState('');
   const [authPass, setAuthPass] = useState('');
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
+
     try {
-      const { data: user, error } = await supabase
-        .from('users')
-        .select('*')
-        .eq('email', authEmail)
-        .single();
+      const res = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: authEmail, password: authPass }),
+      });
 
-      if (error || !user) throw new Error('User not found');
+      const result = await res.json();
 
-      const valid = await bcrypt.compare(authPass, user.password_hash);
-      if (!valid) throw new Error('Wrong password');
+      if (!res.ok) throw new Error(result.error);
 
-      const session = {
-        id: user.id,
-        email: user.email,
-        role: user.role,
-        full_name: user.full_name,
-      };
-
-      localStorage.setItem('aoi_session', JSON.stringify(session));
+      localStorage.setItem('aoi_session', JSON.stringify(result));
       router.push('/portal');
     } catch (err: any) {
-      alert(err.message);
+      toast.error( err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -51,16 +43,13 @@ export default function LoginPage() {
         className="w-full max-w-sm space-y-4 bg-[#111827] p-8 rounded-3xl border border-gray-800 shadow-2xl"
       >
         <div className="text-center mb-6">
-          <img
-            src={AOILOGO.src}
-            alt="AOI Logo"
-            className="w-45 h-45 mx-auto mb-1"
-          />
+          <img src={AOILOGO.src} alt="AOI Logo" className="w-45 h-45 mx-auto mb-1" />
           <h1 className="text-2xl font-black text-white">AOI LOGIN</h1>
         </div>
 
         <input
           type="email"
+          required
           placeholder="Email"
           value={authEmail}
           onChange={(e) => setAuthEmail(e.target.value)}
@@ -69,14 +58,18 @@ export default function LoginPage() {
 
         <input
           type="password"
+          required
           placeholder="Password"
           value={authPass}
           onChange={(e) => setAuthPass(e.target.value)}
           className="w-full bg-[#0a0f1a] border border-gray-800 rounded-2xl p-4 text-white outline-none focus:ring-2 focus:ring-blue-500"
         />
 
-        <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl">
-          SIGN IN
+        <button 
+          disabled={loading}
+          className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white font-bold py-4 rounded-2xl transition-colors"
+        >
+          {loading ? 'AUTHENTICATING...' : 'SIGN IN'}
         </button>
       </form>
     </div>
