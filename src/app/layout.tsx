@@ -2,8 +2,8 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import { SpeedInsights } from "@vercel/speed-insights/next"
+import { Toaster } from 'sonner';
 
-<SpeedInsights/>
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
@@ -19,10 +19,22 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <link rel="icon" href="./AOI_COLOR_NLOGO_WHITE.ico" />
+        {/* Make sure this path is correct relative to your public folder */}
+        <link rel="icon" href="/AOI_COLOR_NLOGO_WHITE.ico" />
       </head>
       <body className={inter.className}>
+        {/* The Toaster handles all your beautiful notifications */}
+        <Toaster 
+          position="top-right" 
+          richColors 
+          theme="dark" 
+          closeButton 
+          expand={false}
+        />
+        
         {children}
+        
+        <SpeedInsights />
       </body>
     </html>
   )
