@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import bcrypt from 'bcryptjs';
 import { useRouter } from 'next/navigation';
+import {toast} from "sonner";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL || '',
@@ -40,7 +41,7 @@ export default function LoginPage() {
       localStorage.setItem('aoi_session', JSON.stringify(session));
       router.push('/portal');
     } catch (err: any) {
-      alert(err.message);
+      toast.error(err.message);
     }
   };
 

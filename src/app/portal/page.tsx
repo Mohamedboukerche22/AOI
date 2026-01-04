@@ -1,6 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+
+import { toast } from 'sonner';
+
 import { useRouter } from "next/navigation";
 import {
   Users,
@@ -14,10 +17,13 @@ import {
   Heart,
   Edit2,
   Package,
+  Settings,
 } from "lucide-react";
 import { createClient } from "@supabase/supabase-js";
 import StudentForm from "../pages/StudentForm";
-import Logistics from "../pages/Logicials"; // Ensure the filename is correct (Logicials vs Logistics)
+import Logistics from "../pages/Logicials";
+import StaffManagement from "@/components/StaffManagement";
+import SettingsView from "@/components/SettingsView";
 
 /* Types */
 type Student = {
@@ -85,7 +91,50 @@ export default function AOIPortal() {
     link.click();
   };
 
-  // CSV Import Logic
+  const [coaches, setCoaches] = useState<any[]>([]);
+  const [newEmail, setNewEmail] = useState("");
+
+  const fetchCoaches = async () => {
+    const { data, error } = await supabase
+      .from("users")
+      .select("*")
+      .eq("role", "coach")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    setCoaches(data || []);
+  };
+  useEffect(() => {
+    if (view === "staff") fetchCoaches();
+  }, [view]);
+
+  const addCoach = async () => {
+    if (!newEmail) toast.warning("Email required");
+
+    const res = await fetch("/api/admin/add-coach", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: newEmail }),
+    });
+
+    const result = await res.json();
+
+    if (!res.ok) {
+      toast.error(result.error);
+    } else {
+      toast.success("Coach added successfully (default password: AOI)");
+      setNewEmail("");
+      fetchCoaches();
+    }
+  };
+
+
+
+
   const handleFileUpload = async (e: any) => {
     const file = e.target.files[0];
     const reader = new FileReader();
@@ -109,14 +158,16 @@ export default function AOIPortal() {
       const { error } = await supabase
         .from("students")
         .insert(studentsToInsert);
-      if (error) alert(error.message);
+      if (error) toast.error(error.message);
       else {
-        alert("Import Successful!");
+        toast.success("Import Successful!");
         fetchStudents();
       }
     };
     reader.readAsText(file);
   };
+  const isAdmin = currentUser?.role === "admin";
+
 
   if (!currentUser) return null;
 
@@ -133,43 +184,50 @@ export default function AOIPortal() {
         <nav className="space-y-2 flex-1">
           <button
             onClick={() => setView("dashboard")}
-            className={`w-full flex items-center space-x-3 p-4 rounded-2xl transition ${
-              view === "dashboard"
+            className={`w-full flex items-center space-x-3 p-4 rounded-2xl transition ${view === "dashboard"
                 ? "bg-blue-600 shadow-lg shadow-blue-900/20 text-white"
                 : "hover:bg-white/5 text-gray-400"
-            }`}
+              }`}
           >
             <LayoutDashboard size={20} />{" "}
             <span className="font-bold">Dashboard</span>
           </button>
+
           <button
             onClick={() => setView("students")}
-            className={`w-full flex items-center space-x-3 p-4 rounded-2xl transition ${
-              view === "students"
+            className={`w-full flex items-center space-x-3 p-4 rounded-2xl transition ${view === "students"
                 ? "bg-blue-600 shadow-lg shadow-blue-900/20 text-white"
                 : "hover:bg-white/5 text-gray-400"
-            }`}
+              }`}
           >
             <Users size={20} /> <span className="font-bold">Students</span>
           </button>
           <button
             onClick={() => setView("logistics")}
-            className={`w-full flex items-center space-x-3 p-4 rounded-2xl transition ${
-              view === "logistics"
+            className={`w-full flex items-center space-x-3 p-4 rounded-2xl transition ${view === "logistics"
                 ? "bg-blue-600 shadow-lg shadow-blue-900/20 text-white"
                 : "hover:bg-white/5 text-gray-400"
-            }`}
+              }`}
           >
             <Package size={20} /> <span className="font-bold">Technical resources</span>
+          </button>
+          <button
+            onClick={() => setView("settings")}
+            className={`w-full flex items-center space-x-3 p-4 rounded-2xl transition ${view === "settings"
+                ? "bg-blue-600 text-white"
+                : "hover:bg-white/5 text-gray-400"
+              }`}
+          >
+            <Settings size={20} />
+            <span className="font-bold">Settings</span>
           </button>
           {currentUser?.role === "admin" && (
             <button
               onClick={() => setView("staff")}
-              className={`w-full flex items-center space-x-3 p-4 rounded-2xl transition ${
-                view === "staff"
+              className={`w-full flex items-center space-x-3 p-4 rounded-2xl transition ${view === "staff"
                   ? "bg-blue-600 shadow-lg shadow-blue-900/20 text-white"
                   : "hover:bg-white/5 text-gray-400"
-              }`}
+                }`}
             >
               <UserCog size={20} /> <span className="font-bold">Staff</span>
             </button>
@@ -206,6 +264,21 @@ export default function AOIPortal() {
             </div>
           </div>
         </header>
+        {view === "staff" && (
+          <StaffManagement
+            coaches={coaches}
+            newEmail={newEmail}
+            setNewEmail={setNewEmail}
+            onAddCoach={addCoach}
+          />
+        )}
+
+        {view === "settings" && (
+          <SettingsView
+            user={currentUser}
+            onUpdate={(u) => setCurrentUser(u)}
+          />
+        )}
 
         {/* Dynamic View Rendering */}
         {view === "logistics" ? (
@@ -280,11 +353,9 @@ export default function AOIPortal() {
               ))}
             </div>
           </div>
-        ) : (
-          <div className="p-12 text-center text-gray-500 bg-[#111827] rounded-3xl border border-dashed border-gray-800">
-            Welcome to the Dashboard. Select a module from the sidebar.
-          </div>
-        )}
+        ) : (view === "dashboard" && (
+          <div className="text-gray-400">Dashboard coming soon...</div>
+        ))}
       </main>
 
       {/* Student Modal */}
@@ -324,6 +395,16 @@ export default function AOIPortal() {
         <Package
           onClick={() => setView("logistics")}
           className={view === "logistics" ? "text-blue-500" : "text-gray-500"}
+        />
+        {isAdmin && (
+          <UserCog
+            onClick={() => setView("staff")}
+            className={view === "staff" ? "text-blue-500" : "text-gray-500"}
+          />
+        )}
+        <Settings
+          onClick={() => setView("settings")}
+          className={view === "settings" ? "text-blue-500" : "text-gray-500"}
         />
         <LogOut
           onClick={() => {

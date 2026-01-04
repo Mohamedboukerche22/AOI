@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import {toast} from "sonner";
 
 export default function SettingsPage() {
   const [user, setUser] = useState<any>(null);
@@ -42,10 +43,10 @@ export default function SettingsPage() {
 
       // Update local storage with new info
       localStorage.setItem('aoi_session', JSON.stringify(result.user));
-      alert('Settings saved successfully!');
-      setPassword(''); // Clear password field
+      toast.success('Settings saved successfully!');
+      setPassword(''); 
     } catch (err: any) {
-      alert(err.message);
+      toast.error(err.message);
     } finally {
       setLoading(false);
     }
